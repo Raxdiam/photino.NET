@@ -1274,6 +1274,27 @@ public partial class PhotinoWindow
         }
     }
 
+    ///<summary>Begins a mouse drag operation to move the native window. Throws an exception if the window is not initialized.</summary>
+    public void DragMove() {
+        Log(".DragMove()");
+        if (_nativeInstance == IntPtr.Zero)
+            throw new ApplicationException("DragMove cannot be called until after the Photino window is initialized.");
+        Invoke(() => Photino_DragMove(_nativeInstance));
+    }
+
+    ///<summary>Windows platform only. Begins a mouse drag operation to move the native window edge or corner. Throws an exception if the window is not initialized.</summary>
+    ///<param name="edge">Edge of native window to move.</param>
+    public void DragResize(PhotinoResizeEdge edge) {
+        Log($".DragResize({edge})");
+        if (_nativeInstance == IntPtr.Zero)
+            throw new ApplicationException("DragResize cannot be called until after the Photino window is initialized.");
+
+        if (IsWindowsPlatform)
+            Invoke(() => Photino_DragResize(_nativeInstance, edge));
+        else
+            Log("DragResize is only supported on the Windows platform");
+    }
+
     ///<summary>Closes the native window. Throws an exception if the window is not initialized.</summary>
     public void Close()
     {
