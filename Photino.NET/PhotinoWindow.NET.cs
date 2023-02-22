@@ -1301,44 +1301,7 @@ public partial class PhotinoWindow
         Invoke(() => Photino_ShowNotification(_nativeInstance, title, body));
     }
     
-    /// <summary>
-    /// Show an open file dialog native to the OS. Throws an exception if the window is not initialized.<br />
-    /// Note: Filter names are not used on macOS.
-    /// </summary>
-    public string[] ShowOpenFile(string title = "Choose file", string defaultPath = null, bool multiSelect = false, (string Name, string[] Extensions)[] filters = null) => ShowOpenDialog(false, title, defaultPath, multiSelect, filters);
-
-    ///<summary>Show an open folder dialog native to the OS. Throws an exception if the window is not initialized.</summary>
-    public string[] ShowOpenFolder(string title = "Select folder", string defaultPath = null, bool multiSelect = false) => ShowOpenDialog(true, title, defaultPath, multiSelect, null);
-
-    ///<summary>
-    /// Show an save folder dialog native to the OS. Throws an exception if the window is not initialized.
-    /// Note: Filter names are not used on macOS.
-    /// </summary>
-    public string ShowSaveFile(string title = "Save file", string defaultPath = null, (string Name, string[] Extensions)[] filters = null)
-    {
-        defaultPath ??= Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        filters ??= Array.Empty<(string, string[])>();
-
-        string result = null;
-        var nativeFilters = GetNativeFilters(filters);
-
-        Invoke(() => {
-            var ptrResult = Photino_ShowSaveFile(_nativeInstance, title, defaultPath, nativeFilters, filters.Length);
-            result = Marshal.PtrToStringAuto(ptrResult);
-        });
-
-        return result;
-    }
-
-    ///<summary>Show a message dialog native to the OS. Throws an exception if the window is not initialized.</summary>
-    public PhotinoDialogResult ShowMessage(string title, string text, PhotinoDialogButtons buttons = PhotinoDialogButtons.Ok, PhotinoDialogIcon icon = PhotinoDialogIcon.Info)
-    {
-        var result = PhotinoDialogResult.Cancel;
-        Invoke(() => result = Photino_ShowMessage(_nativeInstance, title, text, buttons, icon));
-        return result;
-    }
-
-    private string[] ShowOpenDialog(bool foldersOnly, string title, string defaultPath, bool multiSelect, (string Name, string[] Extensions)[] filters)
+    internal string[] ShowOpenDialog(bool foldersOnly, string title, string defaultPath, bool multiSelect, (string Name, string[] Extensions)[] filters)
     {
         defaultPath ??= Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         filters ??= Array.Empty<(string, string[])>();
@@ -1347,7 +1310,7 @@ public partial class PhotinoWindow
         var nativeFilters = GetNativeFilters(filters, foldersOnly);
 
         Invoke(() => {
-            var ptrResults = foldersOnly ? 
+            var ptrResults = foldersOnly ?
                 Photino_ShowOpenFolder(_nativeInstance, title, defaultPath, multiSelect, out var resultCount) :
                 Photino_ShowOpenFile(_nativeInstance, title, defaultPath, multiSelect, nativeFilters, nativeFilters.Length, out resultCount);
             if (resultCount == 0) return;
@@ -1364,6 +1327,29 @@ public partial class PhotinoWindow
         return results;
     }
 
+    internal string ShowSaveFile(string title, string defaultPath, (string Name, string[] Extensions)[] filters)
+    {
+        defaultPath ??= Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        filters ??= Array.Empty<(string, string[])>();
+
+        string result = null;
+        var nativeFilters = GetNativeFilters(filters);
+
+        Invoke(() => {
+            var ptrResult = Photino_ShowSaveFile(_nativeInstance, title, defaultPath, nativeFilters, filters.Length);
+            result = Marshal.PtrToStringAuto(ptrResult);
+        });
+
+        return result;
+    }
+    
+    internal PhotinoDialogResult ShowMessage(string title, string text, PhotinoDialogButtons buttons, PhotinoDialogIcon icon)
+    {
+        var result = PhotinoDialogResult.Cancel;
+        Invoke(() => result = Photino_ShowMessage(_nativeInstance, title, text, buttons, icon));
+        return result;
+    }
+    
     private void Log(string message)
     {
         if (LogVerbosity < 1) return;
