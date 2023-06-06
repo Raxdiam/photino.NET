@@ -633,6 +633,45 @@ public partial class PhotinoWindow
         }
     }
 
+    ///<summary>Gets or set handlers for WebNavigationStarted event. Set assigns a new handler to the event.</summary>
+    public EventHandler WebNavigationStartedHandler
+    {
+        get
+        {
+            return WebNavigationStarted;
+        }
+        set
+        {
+            WebNavigationStarted += value;
+        }
+    }
+
+    ///<summary>Gets or set handlers for WebContentLoading event. Set assigns a new handler to the event.</summary>
+    public EventHandler WebContentLoadingHandler
+    {
+        get
+        {
+            return WebContentLoading;
+        }
+        set
+        {
+            WebContentLoading += value;
+        }
+    }
+
+    ///<summary>Gets or set handlers for WebNavigationCompleted event. Set assigns a new handler to the event.</summary>
+    public EventHandler WebNavigationCompletedHandler
+    {
+        get
+        {
+            return WebNavigationCompleted;
+        }
+        set
+        {
+            WebNavigationCompleted += value;
+        }
+    }
+
     ///<summary>Gets or Sets the native window width in pixels. Default is 0. See also UseOsDefaultSize.</summary>
     public int Width
     {
@@ -835,6 +874,9 @@ public partial class PhotinoWindow
         _startupParameters.FocusInHandler = OnFocusIn;
         _startupParameters.FocusOutHandler = OnFocusOut;
         _startupParameters.WebMessageReceivedHandler = OnWebMessageReceived;
+        _startupParameters.WebNavigationStartedHandler = OnWebNavigationStarted;
+        _startupParameters.WebContentLoadingHandler = OnWebContentLoading;
+        _startupParameters.WebNavigationCompletedHandler = OnWebNavigationCompleted;
         _startupParameters.CustomSchemeHandler = OnCustomScheme;
     }
 

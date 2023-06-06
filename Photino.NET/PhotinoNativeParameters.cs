@@ -67,9 +67,18 @@ namespace PhotinoNET
 		
 		///<summary>SET BY PHOTINIWINDOW CONSTRUCTOR</summary>
 		[MarshalAs(UnmanagedType.FunctionPtr)] internal CppWebMessageReceivedDelegate WebMessageReceivedHandler;
-		
-		///<summary>OPTIONAL: Names of custom URL Schemes. e.g. 'app', 'custom'. Array length must be 16. Default is none.</summary>
-		[MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.LPWStr, SizeConst = 16)] 
+
+        ///<summary>SET BY PHOTINIWINDOW CONSTRUCTOR</summary>
+        [MarshalAs(UnmanagedType.FunctionPtr)] internal CppWebNavigationStartedDelegate WebNavigationStartedHandler;
+
+        ///<summary>SET BY PHOTINIWINDOW CONSTRUCTOR</summary>
+        [MarshalAs(UnmanagedType.FunctionPtr)] internal CppWebContentLoadingDelegate WebContentLoadingHandler;
+
+        ///<summary>SET BY PHOTINIWINDOW CONSTRUCTOR</summary>
+        [MarshalAs(UnmanagedType.FunctionPtr)] internal CppWebNavigationCompletedDelegate WebNavigationCompletedHandler;
+
+        ///<summary>OPTIONAL: Names of custom URL Schemes. e.g. 'app', 'custom'. Array length must be 16. Default is none.</summary>
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.LPWStr, SizeConst = 16)] 
 		internal string[] CustomSchemeNamesWide;
 		[MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.LPStr, SizeConst = 16)] 
 		internal string[] CustomSchemeNames;

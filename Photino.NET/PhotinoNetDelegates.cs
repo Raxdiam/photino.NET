@@ -131,6 +131,52 @@ namespace PhotinoNET
         }
 
 
+
+        public event EventHandler WebNavigationStarted;
+        ///<summary>Registers user-defined handler methods to receive callbacks from the native window when it starts navigating to a new page.</summary>
+        public PhotinoWindow RegisterWebNavigationStartedHandler(EventHandler handler)
+        {
+            WebNavigationStarted += handler;
+            return this;
+        }
+        ///<summary>Invokes registered user-defined handler methods when the native window starts navigating to a new page.</summary>
+        internal void OnWebNavigationStarted()
+        {
+            WebNavigationStarted?.Invoke(this, EventArgs.Empty);
+        }
+
+
+
+        public EventHandler WebContentLoading;
+        ///<summary>Registers user-defined handler methods to receive callbacks from the native window when it starts loading content.</summary>
+        public PhotinoWindow RegisterWebContentLoadingHandler(EventHandler handler)
+        {
+            WebContentLoading += handler;
+            return this;
+        }
+        ///<summary>Invokes registered user-defined handler methods when the native window starts loading content.</summary>
+        internal void OnWebContentLoading()
+        {
+            WebContentLoading?.Invoke(this, EventArgs.Empty);
+        }
+
+
+
+        public event EventHandler WebNavigationCompleted;
+        ///<summary>Registers user-defined handler methods to receive callbacks from the native window when it finishes navigating to a new page.</summary>
+        public PhotinoWindow RegisterWebNavigationCompletedHandler(EventHandler handler)
+        {
+            WebNavigationCompleted += handler;
+            return this;
+        }
+        ///<summary>Invokes registered user-defined handler methods when the native window finishes navigating to a new page.</summary>
+        internal void OnWebNavigationCompleted()
+        {
+            WebNavigationCompleted?.Invoke(this, EventArgs.Empty);
+        }
+
+
+
         public delegate bool NetClosingDelegate(object sender, EventArgs e);
         public event NetClosingDelegate WindowClosing;
         ///<summary>Registers user-defined handler methods to receive callbacks from the native window when the window is about to close. Handler can return true to prevent the window from closing.</summary>
