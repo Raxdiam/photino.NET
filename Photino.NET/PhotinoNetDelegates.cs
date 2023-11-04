@@ -276,6 +276,39 @@ namespace PhotinoNET
             WindowCreated?.Invoke(this, null);
         }
 
+        public delegate void FileDragDropDelegate(object sender, string id, string[] files);
+        public event FileDragDropDelegate FileDragDrop;
+
+        /// <summary>
+        /// Registers user-defined handler methods to receive callbacks after the native window is created.
+        /// </summary>
+        /// <returns>
+        /// Returns the current <see cref="PhotinoWindow"/> instance.
+        /// </returns>
+        /// <param name="handler"><see cref="EventHandler"/></param>
+        public PhotinoWindow RegisterFileDragDrop(FileDragDropDelegate handler)
+        {
+            FileDragDrop += handler;
+            return this;
+        }
+
+        /// <summary>
+        /// Invokes registered user-defined handler methods after the native window is created.
+        /// </summary>
+        internal void OnFileDragDrop(string id, IntPtr files, int numFiles)
+        {
+            var arr = new string[numFiles];
+            var ptrSize = Marshal.SizeOf<IntPtr>();
+
+            for (var i = 0; i < numFiles; i++) 
+            {
+                var ptrStr = Marshal.ReadIntPtr(files, i * ptrSize);
+                arr[i] = Marshal.PtrToStringAuto(ptrStr);
+            }
+
+            FileDragDrop?.Invoke(this, id, arr);
+        }
+
 
         //NOTE: There is 1 callback from C++ to C# which is automatically registered. The .NET callback appropriate for the custom scheme is handled in OnCustomScheme().
 

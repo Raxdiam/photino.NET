@@ -108,6 +108,9 @@ namespace PhotinoNET
         [MarshalAs(UnmanagedType.FunctionPtr)] internal CppMovedDelegate MovedHandler;
 
         ///<summary>SET BY PHOTINIWINDOW CONSTRUCTOR</summary>
+        [MarshalAs(UnmanagedType.FunctionPtr)] internal CppFileDragDropDelegate FileDragDropHandler;
+
+        ///<summary>SET BY PHOTINIWINDOW CONSTRUCTOR</summary>
         [MarshalAs(UnmanagedType.FunctionPtr)] internal CppWebMessageReceivedDelegate WebMessageReceivedHandler;
 
         ///<summary>OPTIONAL: Names of custom URL Schemes. e.g. 'app', 'custom'. Array length must be 16. Default is none.</summary>

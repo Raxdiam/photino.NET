@@ -1344,6 +1344,23 @@ public partial class PhotinoWindow
     }
 
     /// <summary>
+    /// Gets or sets handlers for FileDragDrop event.
+    /// Set assigns a new handler to the event.
+    /// </summary>
+    /// <seealso cref="FileDragDrop"/>
+    public FileDragDropDelegate FileDragDropHandler
+    {
+        get 
+        {
+            return FileDragDrop;
+        }
+        set 
+        {
+            FileDragDrop += value;
+        }
+    }
+
+    /// <summary>
     /// Gets or sets the native browser control <see cref="PhotinoWindow.Zoom"/>.
     /// Default is 100.
     /// </summary>
@@ -1420,6 +1437,7 @@ public partial class PhotinoWindow
         _startupParameters.MovedHandler = OnLocationChanged;
         _startupParameters.FocusInHandler = OnFocusIn;
         _startupParameters.FocusOutHandler = OnFocusOut;
+        _startupParameters.FileDragDropHandler = OnFileDragDrop;
         _startupParameters.WebMessageReceivedHandler = OnWebMessageReceived;
         _startupParameters.CustomSchemeHandler = OnCustomScheme;
     }
