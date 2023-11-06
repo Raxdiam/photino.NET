@@ -1389,6 +1389,22 @@ public partial class PhotinoWindow
     }
 
     /// <summary>
+    /// Gets the current monitor.
+    /// </summary>
+    public Monitor CurrentMonitor 
+    {
+        get 
+        {
+            if (_nativeInstance == IntPtr.Zero)
+                throw new ApplicationException("The Photino window hasn't been initialized yet.");
+
+            Monitor monitor = default;
+            Invoke(() => Photino_GetCurrentMonitor(_nativeInstance, out monitor));
+            return monitor;
+        }
+    }
+
+    /// <summary>
     /// Gets or sets the logging verbosity to standard output (Console/Terminal).
     /// 0 = Critical Only
     /// 1 = Critical and Warning
