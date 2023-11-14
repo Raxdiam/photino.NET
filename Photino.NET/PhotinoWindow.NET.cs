@@ -1371,6 +1371,13 @@ public partial class PhotinoWindow
         }
     }
 
+    public void SetMenuBar(MenuBar menuBar)
+    {
+        var count = menuBar.Menus.Count;
+        var native = menuBar.ToNative();
+        Invoke(() => Photino_SetMenuBar(_nativeInstance, native, count));
+    }
+
     /// <summary>
     /// Gets or sets the logging verbosity to standard output (Console/Terminal).
     /// 0 = Critical Only
