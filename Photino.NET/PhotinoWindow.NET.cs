@@ -970,7 +970,6 @@ public partial class PhotinoWindow
     /// <remarks>
     /// Either StartString or StartUrl must be specified.
     /// </remarks>
-    /// <seealso cref="StartUrl" />
     /// <exception cref="ApplicationException">
     /// Thrown if trying to set value after native window is initalized.
     /// </exception>
@@ -989,41 +988,49 @@ public partial class PhotinoWindow
             if (string.Compare(ss, value, true) != 0)
             {
                 if (_nativeInstance != IntPtr.Zero)
-                    throw new ApplicationException($"{nameof(ss)} cannot be changed after Photino Window is initialized");
-                LoadRawString(value);
+                    throw new ApplicationException($"{nameof(StartString)} cannot be changed after Photino Window is initialized");
+                NavigateToString(value);
             }
         }
     }
 
-    /// <summary>
-    /// Gets or sets an URL that the browser control will navigate to when initialized.
-    /// Default is none.
-    /// </summary>
-    /// <remarks>
-    /// Either StartString or StartUrl must be specified.
-    /// </remarks>
-    /// <seealso cref="StartString" />
-    /// <exception cref="ApplicationException">
-    /// Thrown if trying to set value after native window is initalized.
-    /// </exception>
-    public string StartUrl
-    {
-        get
-        {
-            if (IsWindowsPlatform)
-                return _startupParameters.StartUrlWide;
-            else
-                return _startupParameters.StartUrl;
+    [Obsolete("Use Source instead.")]
+    public string StartUrl {
+        get => Source.AbsoluteUri;
+        set {
+            var startUrl = IsWindowsPlatform ? _startupParameters.StartUrlWide : _startupParameters.StartUrl;
+            if (startUrl.Equals(value, StringComparison.OrdinalIgnoreCase)) return;
+            if (_nativeInstance != IntPtr.Zero)
+                throw new ApplicationException($"{nameof(StartUrl)} cannot be changed after Photino Window is initialized");
+            Navigate(value);
         }
-        set
-        {
-            var su = IsWindowsPlatform ? _startupParameters.StartUrlWide : _startupParameters.StartUrl;
-            if (string.Compare(su, value, true) != 0)
-            {
-                if (_nativeInstance != IntPtr.Zero)
-                    throw new ApplicationException($"{nameof(su)} cannot be changed after Photino Window is initialized");
-                Load(value);
-            }
+    }
+
+    /// <summary>
+    /// Gets or sets the URI of the top-level document to display in the browser control.
+    /// </summary>
+    public Uri Source {
+        get {
+            if (_nativeInstance == IntPtr.Zero)
+                if (IsWindowsPlatform)
+                    return new Uri(_startupParameters.StartUrlWide, UriKind.Absolute);
+                else
+                    return new Uri(_startupParameters.StartUrl, UriKind.Absolute);
+
+            var source = string.Empty;
+            Invoke(() => {
+                var ptr = Photino_GetSource(_nativeInstance);
+                source = Marshal.PtrToStringAuto(ptr);
+            });
+
+            return new Uri(source, UriKind.Absolute);
+        }
+        set {
+            var startUrl = new Uri(IsWindowsPlatform ? _startupParameters.StartUrlWide : _startupParameters.StartUrl);
+            if (startUrl.AbsoluteUri == value.AbsoluteUri) return;
+            if (_nativeInstance != IntPtr.Zero)
+                throw new ApplicationException($"{nameof(Source)} cannot be changed after Photino Window is initialized");
+            Navigate(value);
         }
     }
 
@@ -1506,41 +1513,45 @@ public partial class PhotinoWindow
     }
 
     /// <summary>
-    /// Loads a specified <see cref="Uri"/> into the browser control.
+    /// Navigates to a specified <see cref="Uri"/> in the browser control.
     /// </summary>
     /// <returns>
     /// Returns the current <see cref="PhotinoWindow"/> instance.
     /// </returns>
     /// <remarks>
-    /// Load() or LoadString() must be called before native window is initialized.
+    /// Navigate() or NavigateToString() must be called before native window is initialized.
     /// </remarks>
-    /// <param name="uri">A Uri pointing to the file or the URL to load.</param>
-    public PhotinoWindow Load(Uri uri)
+    /// <param name="uri">A Uri pointing to the file or the URL to navigate to.</param>
+    public PhotinoWindow Navigate(Uri uri)
     {
-        Log($".Load({uri})");
+        Log($".Navigate({uri})");
+
+        if (!uri.IsAbsoluteUri)
+            throw new ArgumentException("Must be an absolute URI.", nameof(uri));
+
         if (_nativeInstance == IntPtr.Zero)
             if (IsWindowsPlatform)
-                _startupParameters.StartUrlWide = uri.ToString();
+                _startupParameters.StartUrlWide = uri.AbsoluteUri;
             else
-                _startupParameters.StartUrl = uri.ToString();
+                _startupParameters.StartUrl = uri.AbsoluteUri;
         else
-            Invoke(() => Photino_NavigateToUrl(_nativeInstance, uri.ToString()));
+            Invoke(() => Photino_Navigate(_nativeInstance, uri.AbsoluteUri));
         return this;
     }
 
     /// <summary>
-    /// Loads a specified path into the browser control.
+    /// Navigates to a specified path in the browser control.
     /// </summary>
     /// <returns>
     /// Returns the current <see cref="PhotinoWindow"/> instance.
     /// </returns>
     /// <remarks>
-    /// Load() or LoadString() must be called before native window is initialized.
+    /// Navigate() or NavigateToString() must be called before native window is initialized.
     /// </remarks>
-    /// <param name="path">A path pointing to the ressource to load.</param>
-    public PhotinoWindow Load(string path)
+    /// <param name="path">A path pointing to the resource to navigate to.</param>
+    public PhotinoWindow Navigate(string path)
     {
-        Log($".Load({path})");
+        Log($".Navigate({path})");
 
         // ––––––––––––––––––––––
         // SECURITY RISK!
@@ -1548,7 +1559,7 @@ public partial class PhotinoWindow
         // ––––––––––––––––––––––
         // Open a web URL string path
         if (path.Contains("http://") || path.Contains("https://"))
-            return Load(new Uri(path));
+            return Navigate(new Uri(path));
 
         // Open a file resource string path
         string absolutePath = Path.GetFullPath(path);
@@ -1566,24 +1577,24 @@ public partial class PhotinoWindow
             }
         }
 
-        return Load(new Uri(absolutePath, UriKind.Absolute));
+        return Navigate(new Uri(absolutePath, UriKind.Absolute));
     }
 
     /// <summary>
-    /// Loads a raw string into the browser control.
+    /// Navigates to a raw string into the browser control.
     /// </summary>
     /// <returns>
     /// Returns the current <see cref="PhotinoWindow"/> instance.
     /// </returns>
     /// <remarks>
     /// Used to load HTML into the browser control directly.
-    /// Load() or LoadString() must be called before native window is initialized.
+    /// Navigate() or NavigateToString() must be called before native window is initialized.
     /// </remarks>
     /// <param name="content">Raw content (such as HTML)</param>
-    public PhotinoWindow LoadRawString(string content)
+    public PhotinoWindow NavigateToString(string content)
     {
         var shortContent = content.Length > 50 ? string.Concat(content.AsSpan(0, 50), "...") : content;
-        Log($".LoadRawString({shortContent})");
+        Log($".NavigateToString({shortContent})");
         if (_nativeInstance == IntPtr.Zero)
             if (IsWindowsPlatform)
                 _startupParameters.StartStringWide = content;
@@ -1593,6 +1604,15 @@ public partial class PhotinoWindow
             Invoke(() => Photino_NavigateToString(_nativeInstance, content));
         return this;
     }
+
+    [Obsolete("Use Navigate() instead.")]
+    public PhotinoWindow Load(Uri uri) => Navigate(uri);
+
+    [Obsolete("Use Navigate() instead.")]
+    public PhotinoWindow Load(string path) => Navigate(path);
+
+    [Obsolete("Use NavigateToString() instead.")]
+    public PhotinoWindow LoadRawString(string content) => NavigateToString(content);
 
     /// <summary>
     /// Centers the native window on the primary display.
